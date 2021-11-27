@@ -25,12 +25,12 @@ exports.login = (req, res, next) => {
     //dans le then on cherche si on a trouvé le user ou pas
         .then(user => {
             if (!user) { //si on a pas trouvé le user
-                return res.status(401).json({ error: 'Utilisateur non trouvé !' });
+                return res.status(401).json({ error });
             }
             bcrypt.compare(req.body.password, user.password) //on utilise le package bcrypt pr comparer le mdp envoyé avec la requete avec le hash enregistré dans document user
                 .then(valid => { //ici on reçoit un boolean
                     if (!valid) { //si on recoit false - l'user a rentré le mauvais mdp
-                        return res.status(401).json({ error: 'Mot de passe incorrect !' });
+                        return res.status(401).json({ error });
                     }
                     //on reçoit true
                     res.status(200).json({ //renvoi un objet json qui contient :

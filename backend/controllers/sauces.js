@@ -26,7 +26,6 @@ exports.modifySauce = (req, res, next) => {
     Sauce.findOne({ _id: req.params.id })
         .then(sauce => {
             if (sauce.userId === userId) {
-
                 const sauceObject = req.file ? //si il existe, on aura un type d'objet
                     {
                         ...JSON.parse(req.body.sauce), //on récupère les infos sur l'objet qui sont dans cette partie de la requete
@@ -44,10 +43,12 @@ exports.modifySauce = (req, res, next) => {
 //on trouve l'objet dans la base de donnees - quand on le trouve on extrait le nom du ficheir à suppr
 //et quand le fichier ets supprimé, on supprime l'objet dans la base
 exports.deleteSauce = (req, res, next) => {
+    //pour sécuriser ma route
     const token = req.headers.authorization.split(' ')[1];
     const decodedToken = jwt.verify(token, `${process.env.TOKEN}`);
     const userId = decodedToken.userId;
     //fait en sorte de verifier que l'utilisateur qui supprime soit celui qui a créé la sauce et pas un autre
+
     Sauce.findOne({ _id: req.params.id })
         .then(sauce => {
             if (sauce.userId === userId) {
@@ -73,7 +74,7 @@ exports.getOneSauce = (req, res, next) => {
 exports.getAllSauces = (req, res, next) => {
     Sauce.find() //methode find pour avoir la liste complète des sauces
         .then(sauces => res.status(200).json(sauces)) //on récupère toutes les sauces retournées par la base et l'on envoie en réponse
-        .catch(error => res.status(400).json({ error }));
+        .catch(error => res.status(404).json({ error }));
 };
 
 exports.likeSauce = (req, res, next) => {
@@ -81,7 +82,7 @@ exports.likeSauce = (req, res, next) => {
     const userId = req.body.userId;
 
     switch (like) {
-        case 1:
+        case 1: //l'user veut liker la sauce
             Sauce.findOne({ _id: req.params.id }) //sauce sur laquelle l'user click
                 .then(sauce => {
                     if (sauce.usersDisliked.includes(userId) || sauce.usersLiked.includes(userId)) { //je vérifie si l'userId est déja présent dans un des 2 tableaux
@@ -98,7 +99,7 @@ exports.likeSauce = (req, res, next) => {
                 .catch(error => res.status(400).json({ error }));
             break; //fin de la logique du cas 1
 
-        case 0:
+        case 0: //l'user veut enlever son like ou dislike
             Sauce.findOne({ _id: req.params.id })
                 .then(sauce => {
                     if (sauce.usersDisliked.includes(userId)) {
