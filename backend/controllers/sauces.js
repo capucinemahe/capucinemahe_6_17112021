@@ -1,12 +1,12 @@
 //ici on veut la logique métier
 const Sauce = require('../models/Sauce');
 const fs = require('fs');
-const jwt = require('jsonwebtoken');
 //file system = système de fichiers. donne accès aux fonctions qui nous permettent de modifier le système de fichiers
 //y compris aux fonctions permettant de supprimer les fichiers
+const jwt = require('jsonwebtoken');
 
 exports.createSauce = (req, res, next) => {
-    const sauceObject = JSON.parse(req.body.sauce); //pour extraire l'objet json de thing
+    const sauceObject = JSON.parse(req.body.sauce); //pour extraire l'objet json de sauce
     delete sauceObject._id;
     const sauce = new Sauce({
         ...sauceObject,
@@ -21,7 +21,7 @@ exports.modifySauce = (req, res, next) => {
     const token = req.headers.authorization.split(' ')[1];
     const decodedToken = jwt.verify(token, `${process.env.TOKEN}`);
     const userId = decodedToken.userId;
-    //fait en sorte de verifier que l'utilisateur qui supprime soit celui qui a créé la sauce et pas un autre
+    //fait en sorte de verifier que l'utilisateur qui modifie soit celui qui a créé la sauce et pas un autre
 
     Sauce.findOne({ _id: req.params.id })
         .then(sauce => {
@@ -34,20 +34,19 @@ exports.modifySauce = (req, res, next) => {
                 Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
                     .then(() => res.status(200).json({ message: 'Sauce modifiée !' }))
             } else {
-                res.status(401).json({ message: "vous n'êtes pas autorisé" });
+                res.status(403).json({ message: "vous n'êtes pas autorisé" });
             }
         })
         .catch(error => res.status(400).json({ error }));
 };
 
 //on trouve l'objet dans la base de donnees - quand on le trouve on extrait le nom du ficheir à suppr
-//et quand le fichier ets supprimé, on supprime l'objet dans la base
+//et quand le fichier est supprimé, on supprime l'objet dans la base
 exports.deleteSauce = (req, res, next) => {
-    //pour sécuriser ma route
+    //pour sécuriser ma route encore
     const token = req.headers.authorization.split(' ')[1];
     const decodedToken = jwt.verify(token, `${process.env.TOKEN}`);
     const userId = decodedToken.userId;
-    //fait en sorte de verifier que l'utilisateur qui supprime soit celui qui a créé la sauce et pas un autre
 
     Sauce.findOne({ _id: req.params.id })
         .then(sauce => {
@@ -59,21 +58,23 @@ exports.deleteSauce = (req, res, next) => {
                         .catch(error => res.status(400).json({ error }));
                 });
             } else {
-                res.status(401).json({ message: "vous n'êtes pas autorisé" });
+                res.status(403).json({ message: "vous n'êtes pas autorisé" });
             }
         })
         .catch(error => res.status(500).json({ error }));
 };
 
+//pour avoir une sauce en particulier
 exports.getOneSauce = (req, res, next) => {
-    Sauce.findOne({ _id: req.params.id }) //pour trouver une sauce en particulier
+    Sauce.findOne({ _id: req.params.id })
         .then(sauce => res.status(200).json(sauce))
         .catch(error => res.status(404).json({ error }));
 };
 
+//methode find pour avoir la liste complète des sauces
 exports.getAllSauces = (req, res, next) => {
-    Sauce.find() //methode find pour avoir la liste complète des sauces
-        .then(sauces => res.status(200).json(sauces)) //on récupère toutes les sauces retournées par la base et l'on envoie en réponse
+    Sauce.find()
+        .then(sauces => res.status(200).json(sauces))
         .catch(error => res.status(404).json({ error }));
 };
 
@@ -141,6 +142,5 @@ exports.likeSauce = (req, res, next) => {
                 })
                 .catch(error => res.status(400).json({ error }));
             break;
-
     }
 };

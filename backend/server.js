@@ -1,4 +1,4 @@
-//créer un serveur node 
+//création d'un serveur node 
 const http = require('http');
 const app = require('./app');
 
@@ -17,7 +17,8 @@ const normalizePort = val => {
 const port = normalizePort(process.env.PORT || '3000'); //on set le port
 app.set('port', port);
 
-//la fonction errorHandler recherche les différentes erreurs et les gère de manière appropriée. Elle est ensuite enregistrée dans le serveur.
+//la fonction errorHandler recherche les différentes erreurs et les gère de manière appropriée
+//elle est ensuite enregistrée dans le serveur
 const errorHandler = error => {
   if (error.syscall !== 'listen') {
     throw error;
@@ -38,7 +39,7 @@ const errorHandler = error => {
   }
 };
 
-const server = http.createServer(app); //on passe au serveur l'application 
+const server = http.createServer(app); //on passe l'application au serveur
 
 server.on('error', errorHandler);
 server.on('listening', () => {

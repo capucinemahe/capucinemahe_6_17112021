@@ -16,5 +16,6 @@ const sauceSchema = mongoose.Schema({
 });
 
 //pas besoin de mettre un champ pour l'Id puisqu'il est automatiquement généré par Mongoose
-//on pourra utiliser ce model pour intéragir avec la base de données mongodb
+//on utilisera ce model pour intéragir avec la base de données mongodb
+
 module.exports = mongoose.model('Sauce', sauceSchema);

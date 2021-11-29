@@ -6,14 +6,14 @@ const multer = require('../middleware/multer-config');
 
 const saucesCtrl = require('../controllers/sauces');
 
+//on applique la fonction à la route, on ne l'appelle pas
+//bien mettre auth en premier
 router.get('/', auth, saucesCtrl.getAllSauces);
 router.get('/:id', auth, saucesCtrl.getOneSauce);
-router.post('/', auth, multer, saucesCtrl.createSauce); //bien mettre multer après 'auth'
-router.put('/:id', auth, multer, saucesCtrl.modifySauce); //on applique la fonction à la route, on ne l'appelle pas
+router.post('/', auth, multer, saucesCtrl.createSauce);
+router.put('/:id', auth, multer, saucesCtrl.modifySauce);
 router.delete('/:id', auth, saucesCtrl.deleteSauce);
 
 router.post('/:id/like', auth, saucesCtrl.likeSauce);
 
-module.exports = router;
-
-//routes pour la partie sauces de l'appli
+module.exports = router; //on exporte le routeur, et on l'importe dans app.js

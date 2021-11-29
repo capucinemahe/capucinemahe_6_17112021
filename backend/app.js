@@ -1,23 +1,23 @@
-//on place l'application express
 const express = require('express');
 const app = express();
 app.use(express.json());
-const helmet = require("helmet"); //pour les failles XSS
-app.use(helmet());
-const rateLimit = require("express-rate-limit"); // attaques DDOS
-app.use(limiter);
-
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // limit each IP to 100 requests per windowMs
-  });
 
 const mongoose = require('mongoose');
 const path = require('path'); //donne accès au chemin de notre système de fichiers
 
+const helmet = require("helmet");
+app.use(helmet());
+
+const rateLimit = require("express-rate-limit");
 require('dotenv').config();
 
-const saucesRoutes = require('./routes/sauces');
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, //nombre de ms d’attente avant de pouvoir retenter de se reconnecter - 15 min
+    max: 80 //nombre max de tentatives de connexion admises
+});
+app.use(limiter);
+
+const saucesRoutes = require('./routes/sauces'); 
 const userRoutes = require('./routes/user');
 
 mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_MDP}@${process.env.MONGO_ACCESS}`,
@@ -29,7 +29,7 @@ mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_MD
     .catch(() => console.log('Connexion à MongoDB échouée !'));
 
 
-//middleware general - sera appliqué à toutes les routes - corrige l'erreur de CORS
+//middleware general qui sera appliqué à toutes les routes - corrige l'erreur de CORS
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*'); //accéder à l'API depuis n'importe quelle origine - ou mettre le localhost:xxx du frontend
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
@@ -40,8 +40,7 @@ app.use((req, res, next) => {
 app.use('/images', express.static(path.join(__dirname, 'images')));
 //middleware pr dire à notre app express de servir le dossier images quand on fera une requete à /images
 
-app.use('/api/sauces', saucesRoutes); //on remets le début de la route et on utilise le routeur qui est exposé par saucesRoutes
+app.use('/api/sauces', saucesRoutes); //on remet le début de la route et on utilise le routeur qui est exposé par saucesRoutes
 app.use('/api/auth', userRoutes); //routes liées à l'authentification
-
 
 module.exports = app;
