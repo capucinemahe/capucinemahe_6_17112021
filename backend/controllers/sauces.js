@@ -1,4 +1,5 @@
-//ici on veut la logique métier
+//logique schema Sauce
+
 const Sauce = require('../models/Sauce');
 const fs = require('fs');
 //file system = système de fichiers. donne accès aux fonctions qui nous permettent de modifier le système de fichiers

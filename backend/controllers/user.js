@@ -1,3 +1,5 @@
+//logique schema user
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
@@ -50,8 +52,7 @@ exports.login = (req, res, next) => {
                         token: jwt.sign( //données que l'on veut encoder dans l'objet
                             { userId: user._id },
                             `${process.env.TOKEN}`,
-                            { expiresIn: '24h' }
-                        )
+                            { expiresIn: '24h' })
                     });
                 })
         })

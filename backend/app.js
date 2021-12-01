@@ -8,8 +8,9 @@ const path = require('path'); //donne accès au chemin de notre système de fich
 const helmet = require("helmet");
 app.use(helmet());
 
-const rateLimit = require("express-rate-limit");
 require('dotenv').config();
+
+const rateLimit = require("express-rate-limit");
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, //nombre de ms d’attente avant de pouvoir retenter de se reconnecter - 15 min
@@ -17,7 +18,7 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-const saucesRoutes = require('./routes/sauces'); 
+const saucesRoutes = require('./routes/sauces');
 const userRoutes = require('./routes/user');
 
 mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_MDP}@${process.env.MONGO_ACCESS}`,

@@ -1,3 +1,4 @@
+//configuration de multer
 const multer = require('multer');
 
 //objet dictionnaire - sert pour l'extension du fichier
@@ -7,7 +8,6 @@ const MIME_TYPES = {
     'image/png': 'png'
 };
 
-//configuration de multer
 const storage = multer.diskStorage({ //on enregistre sur le disk
     destination: (req, file, callback) => { //1er element qui dit ou enregistrer les fichiers
         callback(null, 'images'); //null pr dire qu'il n'y a pas d'erreur

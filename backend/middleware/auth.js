@@ -1,4 +1,6 @@
-const jwt = require('jsonwebtoken'); //package jsonwebtoken pr vérifier les tokens
+//middleware d'authentification
+
+const jwt = require('jsonwebtoken'); //package qui sert à vérifier les tokens
 
 module.exports = (req, res, next) => {
     try {
@@ -13,8 +15,6 @@ module.exports = (req, res, next) => {
             next();
         }
     } catch {
-        res.status(401).json({
-            error: new Error('Requête invalide !')
-        });
+        res.status(401).json({ error: new Error('Requête invalide !') });
     }
 };
