@@ -4,11 +4,10 @@ app.use(express.json());
 
 const mongoose = require('mongoose');
 const path = require('path'); //donne accès au chemin de notre système de fichiers
+require('dotenv').config();
 
 const helmet = require("helmet");
 app.use(helmet());
-
-require('dotenv').config();
 
 const rateLimit = require("express-rate-limit");
 

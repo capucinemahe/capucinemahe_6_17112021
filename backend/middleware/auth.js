@@ -11,10 +11,13 @@ module.exports = (req, res, next) => {
         //véirfie si l'userid de la req est different du userid de la BD
         if (req.body.userId && req.body.userId !== userId) {
             throw 'User ID non valable';
+        } else {
             req.user = decodedToken;
             next();
         }
     } catch {
-        res.status(401).json({ error: new Error('Requête invalide !') });
+        res.status(401).json({
+            error: new Error('Requête invalide !')
+        });
     }
 };
