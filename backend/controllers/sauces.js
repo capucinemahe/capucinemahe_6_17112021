@@ -1,10 +1,8 @@
-//logique schema Sauce
+//logique métier des sauces
 
 const Sauce = require('../models/Sauce');
 const fs = require('fs');
-//file system = système de fichiers. donne accès aux fonctions qui nous permettent de modifier le système de fichiers
-//y compris aux fonctions permettant de supprimer les fichiers
-const jwt = require('jsonwebtoken');
+//file system = système de fichiers. donne accès aux fonctions qui nous permettent de modifier ou supprimer le système de fichiers
 
 exports.createSauce = (req, res, next) => {
     const sauceObject = JSON.parse(req.body.sauce); //pour extraire l'objet json de sauce
@@ -19,20 +17,17 @@ exports.createSauce = (req, res, next) => {
 };
 
 exports.modifySauce = (req, res, next) => {
-    const token = req.headers.authorization.split(' ')[1];
-    const decodedToken = jwt.verify(token, `${process.env.TOKEN}`);
-    const userId = decodedToken.userId;
-    //fait en sorte de verifier que l'utilisateur qui modifie soit celui qui a créé la sauce et pas un autre
 
     Sauce.findOne({ _id: req.params.id })
         .then(sauce => {
-            if (sauce.userId === userId) {
+            if (sauce.userId === req.auth.userId) {
                 const sauceObject = req.file ? //si il existe, on aura un type d'objet
                     {
                         ...JSON.parse(req.body.sauce), //on récupère les infos sur l'objet qui sont dans cette partie de la requete
                         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
                     } : { ...req.body }; //sinon on aura ce type d'objet : copie de req.body
-                Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
+                Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id }) //on utilise la méthode updateOne pour modifier la sauce dans la BD
+                    //1er argument pr savoir quel objet on midifie - 2eme argument : nvelle version de l'objet
                     .then(() => res.status(200).json({ message: 'Sauce modifiée !' }))
             } else {
                 res.status(403).json({ message: "vous n'êtes pas autorisé" });
@@ -41,20 +36,16 @@ exports.modifySauce = (req, res, next) => {
         .catch(error => res.status(400).json({ error }));
 };
 
-//on trouve l'objet dans la base de donnees - quand on le trouve on extrait le nom du ficheir à suppr
+//on trouve l'objet dans la base de donnees - quand on le trouve on extrait le nom du fichier à suppr
 //et quand le fichier est supprimé, on supprime l'objet dans la base
 exports.deleteSauce = (req, res, next) => {
-    //pour sécuriser ma route encore
-    const token = req.headers.authorization.split(' ')[1];
-    const decodedToken = jwt.verify(token, `${process.env.TOKEN}`);
-    const userId = decodedToken.userId;
 
     Sauce.findOne({ _id: req.params.id })
         .then(sauce => {
-            if (sauce.userId === userId) {
+            if (sauce.userId === req.auth.userId) {
                 const filename = sauce.imageUrl.split('/images/')[1];
                 fs.unlink(`images/${filename}`, () => { //unlink pour supprimer un fichier
-                    Sauce.deleteOne({ _id: req.params.id })
+                    Sauce.deleteOne({ _id: req.params.id }) //prend l'objet de comparaison comme argument 
                         .then(() => res.status(200).json({ message: 'Sauce supprimée !' }))
                         .catch(error => res.status(400).json({ error }));
                 });

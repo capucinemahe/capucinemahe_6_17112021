@@ -1,4 +1,4 @@
-//logique schema user
+//logique métier des users
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -20,7 +20,7 @@ exports.signup = (req, res, next) => {
     if (schemaPV.validate(req.body.password)) {
         bcrypt.hash(req.body.password, 10) //on hash le mot de passe - 10 tours = cb de fois on exécute l'algo de hashage
             .then(hash => {
-                const user = new User({
+                const user = new User({ //on créé un utilisateur
                     email: req.body.email, //adresse fournie dans le corps de la requete
                     password: hash //mot de passe crypté
                 });
@@ -35,24 +35,26 @@ exports.signup = (req, res, next) => {
 };
 
 exports.login = (req, res, next) => {
-    User.findOne({ email: req.body.email }) //pour trouver un seul utilisateur de la base de donnees avec adresse email unique
+    User.findOne({ email: req.body.email }) //on cherche si l'email entré est déja présent dans la BD
         .then(user => {
-            if (!user) { //si on a pas trouvé l'utilisateur
-                return res.status(401).json({ error: `Utilisateur non trouvé: ${req.body.email} !` })
+            if (!user) { //si on a pas trouvé l'utilisateur correspondant à l'email entré
+                return res.status(401).json({ error: 'Utilisateur non trouvé' })
             }
+            //si l'email correspond : 
+            //on utilise le package bcrypt pr comparer le mdp envoyé avec la requete avec le hash enregistré dans la BD
             bcrypt.compare(req.body.password, user.password)
-                //on utilise le package bcrypt pr comparer le mdp envoyé avec la requete avec le hash enregistré dans la BD
-                .then(valid => { //ici on reçoit un boolean
+                .then(valid => { 
                     if (!valid) { //si on recoit false - l'user a rentré le mauvais mdp
                         return res.status(401).json({ error: 'Mot de passe incorrect !' });
                     }
-                    //on reçoit true
+                    //on reçoit true - le mot de passe est bon 
                     res.status(200).json({ //renvoi un objet json qui contient :
-                        userId: user._id,
-                        token: jwt.sign( //données que l'on veut encoder dans l'objet
+                        userId: user._id, //identifiant de l'user dans la BD
+                        token: jwt.sign( //pour encoder un nouveau token crypté
                             { userId: user._id },
                             `${process.env.TOKEN}`,
-                            { expiresIn: '24h' })
+                            { expiresIn: '24h' }
+                        )
                     });
                 })
         })

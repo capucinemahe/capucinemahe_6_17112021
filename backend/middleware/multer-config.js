@@ -1,4 +1,5 @@
 //configuration de multer
+//est un middleware node.js, principalement utilisé pour télécharger des fichiers
 const multer = require('multer');
 
 //objet dictionnaire - sert pour l'extension du fichier
