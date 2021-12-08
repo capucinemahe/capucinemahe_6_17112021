@@ -2,9 +2,6 @@
 const http = require('http');
 const app = require('./app');
 
-
-//ajouter la normalisation de port, la gestion d'erreur et du logging basique à votre serveur Node
-//le rend plus constant et plus facile à déboguer
 //la fonction normalizePort renvoie un port valide
 const normalizePort = val => {
   const port = parseInt(val, 10);
@@ -21,7 +18,6 @@ const port = normalizePort(process.env.PORT || '3000'); //on set le port
 app.set('port', port);
 
 //la fonction errorHandler recherche les différentes erreurs et les gère de manière appropriée
-//elle est ensuite enregistrée dans le serveur
 const errorHandler = error => {
   if (error.syscall !== 'listen') {
     throw error;

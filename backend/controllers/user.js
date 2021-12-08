@@ -9,16 +9,16 @@ const schemaPV = new passwordValidator();
 schemaPV
     .is().min(8)
     .is().max(35)
-    .has().uppercase()     //doit avoir une majuscule
-    .has().lowercase()     //doit avoir des minuscules
-    .has().digits(2)       //doit avoir au moins 2 chiffres                   
-    .has().not().spaces()  //ne doit pas contenir d'espace                    
+    .has().uppercase()   
+    .has().lowercase()     
+    .has().digits(2)                  
+    .has().not().spaces()                   
     .is().not().oneOf(['Passw0rd', 'Password123']); //ne peut pas contenir ces mdp
 
-//la fonction sign up crypte le mot de passe, et va prendre ce mdp et créer un new user
+//la fonction sign up crypte le mdp, et va prendre ce mdp et créer un new user
 exports.signup = (req, res, next) => {
     if (schemaPV.validate(req.body.password)) {
-        bcrypt.hash(req.body.password, 10) //on hash le mot de passe - 10 tours = cb de fois on exécute l'algo de hashage
+        bcrypt.hash(req.body.password, 10) //on hash le mdp - 10 tours = cb de fois on exécute l'algo de hashage
             .then(hash => {
                 const user = new User({ //on créé un utilisateur
                     email: req.body.email, //adresse fournie dans le corps de la requete
@@ -37,7 +37,7 @@ exports.signup = (req, res, next) => {
 exports.login = (req, res, next) => {
     User.findOne({ email: req.body.email }) //on cherche si l'email entré est déja présent dans la BD
         .then(user => {
-            if (!user) { //si on a pas trouvé l'utilisateur correspondant à l'email entré
+            if (!user) { //si on a pas trouvé l'utilisateur correspondant à l'email de la req
                 return res.status(401).json({ error: 'Utilisateur non trouvé' })
             }
             //si l'email correspond : 
@@ -45,14 +45,14 @@ exports.login = (req, res, next) => {
             bcrypt.compare(req.body.password, user.password)
                 .then(valid => { 
                     if (!valid) { //si on recoit false - l'user a rentré le mauvais mdp
-                        return res.status(401).json({ error: 'Mot de passe incorrect !' });
+                        return res.status(401).json({ message: 'Mot de passe incorrect !' });
                     }
                     //on reçoit true - le mot de passe est bon 
                     res.status(200).json({ //renvoi un objet json qui contient :
-                        userId: user._id, //identifiant de l'user dans la BD
-                        token: jwt.sign( //pour encoder un nouveau token crypté
-                            { userId: user._id },
-                            `${process.env.TOKEN}`,
+                        userId: user._id, 
+                        token: jwt.sign( //fonction sign qui prend en arguments :
+                            { userId: user._id }, //le payload
+                            `${process.env.TOKEN}`, 
                             { expiresIn: '24h' }
                         )
                     });
@@ -60,3 +60,4 @@ exports.login = (req, res, next) => {
         })
         .catch(error => res.status(500).json({ error })); //si erreur serveur
 };
+

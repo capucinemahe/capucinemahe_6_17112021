@@ -1,3 +1,5 @@
+//gère toutes les requetes du serveur
+
 //on appelle la méthode express pour créer cette application Express
 const express = require('express');
 const app = express();
