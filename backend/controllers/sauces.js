@@ -6,14 +6,27 @@ const fs = require('fs');
 
 exports.createSauce = (req, res, next) => {
     const sauceObject = JSON.parse(req.body.sauce); //pour extraire l'objet json de sauce
-    delete sauceObject._id; //on enlève l'id de sauceObject
+    delete sauceObject._id; //on enlève l'id du front
     const sauce = new Sauce({
-        ...sauceObject,
-        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` //on genère l'url de l'image de facon dynamique
+        ...sauceObject, imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` //on genère l'url de l'image de facon dynamique
     });
     sauce.save()
         .then(() => res.status(201).json({ message: 'Sauce enregistrée !' }))
         .catch(error => res.status(400).json({ error }));
+};
+
+//methode find pour avoir la liste complète des sauces
+exports.getAllSauces = (req, res, next) => {
+    Sauce.find()
+        .then(sauces => res.status(200).json(sauces))
+        .catch(error => res.status(404).json({ error }));
+};
+
+//pour avoir une sauce en particulier
+exports.getOneSauce = (req, res, next) => {
+    Sauce.findOne({ _id: req.params.id })
+        .then(sauce => res.status(200).json(sauce))
+        .catch(error => res.status(404).json({ error }));
 };
 
 exports.modifySauce = (req, res, next) => {
@@ -27,45 +40,17 @@ exports.modifySauce = (req, res, next) => {
                         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
                     } : { ...req.body }; //si non on aura une copie de req.body
 
-                Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id }) //on utilise la méthode updateOne pour modifier la sauce dans la BD
-                    .then(() => res.status(200).json({ message: 'Sauce modifiée !' }))
-                    .catch(error => res.status(400).json({ error }));
-            } else {
-                res.status(403).json({ message: "vous n'êtes pas autorisé" });
-            }
-        })
-        .catch(error => res.status(400).json({ error }));
-};
-
-exports.deleteSauce = (req, res, next) => {
-    Sauce.findOne({ _id: req.params.id }) //on cherche la sauce dans la BD
-        .then(sauce => {
-            if (sauce.userId === req.auth.userId) {
                 const filename = sauce.imageUrl.split('/images/')[1]; //on extrait le nom du fichier à supprimer
-                fs.unlink(`images/${filename}`, () => { //unlink pour supprimer un fichier
-                    Sauce.deleteOne({ _id: req.params.id }) //on supprime la sauce de la BD
-                        .then(() => res.status(200).json({ message: 'Sauce supprimée !' }))
+                fs.unlink(`images/${filename}`, () => { //unlink pour supprimer un fichier de mon dossier images
+                    Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id }) //on utilise la méthode updateOne pour modifier la sauce dans la BD
+                        .then(() => res.status(200).json({ message: 'Sauce modifiée !' }))
                         .catch(error => res.status(400).json({ error }));
                 });
             } else {
                 res.status(403).json({ message: "vous n'êtes pas autorisé" });
             }
         })
-        .catch(error => res.status(500).json({ error }));
-};
-
-//pour avoir une sauce en particulier
-exports.getOneSauce = (req, res, next) => {
-    Sauce.findOne({ _id: req.params.id })
-        .then(sauce => res.status(200).json(sauce))
-        .catch(error => res.status(404).json({ error }));
-};
-
-//methode find pour avoir la liste complète des sauces
-exports.getAllSauces = (req, res, next) => {
-    Sauce.find()
-        .then(sauces => res.status(200).json(sauces))
-        .catch(error => res.status(404).json({ error }));
+        .catch(error => res.status(400).json({ error }));
 };
 
 exports.likeSauce = (req, res, next) => {
@@ -131,4 +116,21 @@ exports.likeSauce = (req, res, next) => {
                 .catch(error => res.status(400).json({ error }));
             break;
     }
+};
+
+exports.deleteSauce = (req, res, next) => {
+    Sauce.findOne({ _id: req.params.id }) //on cherche la sauce dans la BD
+        .then(sauce => {
+            if (sauce.userId === req.auth.userId) {
+                const filename = sauce.imageUrl.split('/images/')[1]; //on extrait le nom du fichier à supprimer
+                fs.unlink(`images/${filename}`, () => { //unlink pour supprimer un fichier de mon dossier images
+                    Sauce.deleteOne({ _id: req.params.id }) //on supprime la sauce de la BD
+                        .then(() => res.status(200).json({ message: 'Sauce supprimée !' }))
+                        .catch(error => res.status(400).json({ error }));
+                });
+            } else {
+                res.status(403).json({ message: "vous n'êtes pas autorisé" });
+            }
+        })
+        .catch(error => res.status(500).json({ error }));
 };

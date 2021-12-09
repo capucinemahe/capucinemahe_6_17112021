@@ -11,7 +11,7 @@ module.exports = (req, res, next) => {
         if (req.body.userId && req.body.userId !== userId) {
             throw 'User Id non valable';
         } else {
-            req.auth = decodedToken; //je stock le token dans l'objet req.auth
+            req.auth = decodedToken; //je stock le token décodé dans l'objet req.auth
             next();
         }
     } catch {
